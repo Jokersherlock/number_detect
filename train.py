@@ -17,63 +17,64 @@ class ResNetModel(nn.Module):
     def forward(self, x):
         return self.resnet(x)
 
+def main():
 # 数据预处理
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,))
-])
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))
+    ])
 
-# 加载MNIST数据集
-train_dataset = torchvision.datasets.MNIST(root='./data', train=True, download=False, transform=transform)
-test_dataset = torchvision.datasets.MNIST(root='./data', train=False, download=False, transform=transform)
+    # 加载MNIST数据集
+    train_dataset = torchvision.datasets.MNIST(root='./data', train=True, download=False, transform=transform)
+    test_dataset = torchvision.datasets.MNIST(root='./data', train=False, download=False, transform=transform)
 
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-# 初始化模型和优化器
-model = ResNetModel()
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+    # 初始化模型和优化器
+    model = ResNetModel()
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# 训练模型
-num_epochs = 10
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
+    # 训练模型
+    num_epochs = 10
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
 
-for epoch in range(num_epochs):
-    running_loss = 0.0
-    for i, data in enumerate(train_loader, 0):
-        inputs, labels = data[0].to(device), data[1].to(device)
+    for epoch in range(num_epochs):
+        running_loss = 0.0
+        for i, data in enumerate(train_loader, 0):
+            inputs, labels = data[0].to(device), data[1].to(device)
 
-        optimizer.zero_grad()
+            optimizer.zero_grad()
 
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
-        running_loss += loss.item()
-        if i % 100 == 99:    # 每100个batch打印一次损失
-            print(f"Epoch [{epoch + 1}/{num_epochs}], Batch [{i + 1}/{len(train_loader)}], Loss: {running_loss / 100:.4f}")
-            running_loss = 0.0
+            running_loss += loss.item()
+            if i % 100 == 99:    # 每100个batch打印一次损失
+                print(f"Epoch [{epoch + 1}/{num_epochs}], Batch [{i + 1}/{len(train_loader)}], Loss: {running_loss / 100:.4f}")
+                running_loss = 0.0
 
-print("Finished Training")
+    print("Finished Training")
 
-torch.save(model.state_dict(),"mnist_resnet_model.pth")
-print("Model saved successfully")
+    torch.save(model.state_dict(),"mnist_resnet_model.pth")
+    print("Model saved successfully")
 
 
-# 模型评估
-model.eval()
-correct = 0
-total = 0
-with torch.no_grad():
-    for data in test_loader:
-        images, labels = data[0].to(device), data[1].to(device)
-        outputs = model(images)
-        _, predicted = torch.max(outputs.data, 1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
+    # 模型评估
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for data in test_loader:
+            images, labels = data[0].to(device), data[1].to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
 
-accuracy = correct / total
-print(f"Accuracy on test set: {accuracy * 100:.2f}%")
+    accuracy = correct / total
+    print(f"Accuracy on test set: {accuracy * 100:.2f}%")

@@ -43,5 +43,5 @@ def predict_images_in_folder(folder_path):
     print(f"\nTotal images: {total_count}, Correct predictions: {correct_count}, Accuracy: {accuracy:.2f}%")
 
 # 示例用法：替换为你的文件夹路径
-folder_path = 'new_images'
+folder_path = 'test_images'
 predict_images_in_folder(folder_path)

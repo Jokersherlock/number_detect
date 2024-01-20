@@ -78,3 +78,5 @@ def main():
 
     accuracy = correct / total
     print(f"Accuracy on test set: {accuracy * 100:.2f}%")
+
+main()
